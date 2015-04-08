@@ -1,0 +1,4 @@
+-neko bin/zap.n
+-main zap.Main
+-cp src
+
