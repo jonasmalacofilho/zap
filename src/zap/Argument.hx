@@ -14,9 +14,11 @@ abstract Argument(ArgumentImpl) from ArgumentImpl to ArgumentImpl {
 
     @:to public inline function toBoolean()
     {
-        switch (this) {
+        return switch (this) {
+        case null:
+            null;
         case ABoolean(b):
-            return b;
+            b;
         case _:
             throw 'Unexpected boolean $this';
         }
@@ -24,9 +26,11 @@ abstract Argument(ArgumentImpl) from ArgumentImpl to ArgumentImpl {
 
     @:to public inline function toString()
     {
-        switch (this) {
+        return switch (this) {
+        case null:
+            null;
         case AValue(val):
-            return val;
+            val;
         case _:
             throw 'Unexpected value $this';
         }
@@ -35,6 +39,8 @@ abstract Argument(ArgumentImpl) from ArgumentImpl to ArgumentImpl {
     @:to public inline function toArray()
     {
         return switch (this) {
+        case null:
+            null;
         case AValues(vals):
             vals;
         case _:

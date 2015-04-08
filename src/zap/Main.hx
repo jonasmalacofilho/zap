@@ -22,40 +22,53 @@ class Main {
 
     static function parseArgs()
     {
-        var commands = ["download", "analyze"];
-        var args = Sys.args().copy();
-        var positional = false;
-
         var res = new Map<String,Argument>();
-        res["download"] = false;
-        res["analyze"] = false;
+
+        // index
+        var commands = ["dev", "download", "analyze"];
+        var options = ["--data"];
+        var positionals = ["<loc>"];
+        var rest = "<loc>";
+
+        // defaults
         res["--data"] = "./";
         res["<loc>"] = [];
 
+        // automatic defaults
+        for (cmd in commands)
+            res[cmd] = false;
+
+        // parsing
+        var args = Sys.args().copy();
+        var p = 0;
+        var positional = false;
         while (args.length > 0) {
             switch (args.shift()) {
-            case "--data" if (!positional):
-                var data = args.shift();
-                if (data == null)
-                    throw "Argument required for --data";
-                res["--data"] = data;
+            case opt if (!positional && Lambda.has(options, opt)):
+                var val = args.shift();
+                if (val == null)
+                    throw 'Argument required for $opt';
+                res[opt] = val;
             case cmd if (!positional && Lambda.has(commands, cmd)):
                 res[cmd] = true;
             case "--":
                 positional = true;
-            case loc if (!loc.startsWith("--") || positional):
-                res["<loc>"].push(loc);
+            case pos if (!pos.startsWith("--") || positional):
+                var name = p < positionals.length ? positionals[p++] : rest;
+                if (rest == null)
+                    throw 'Unmatched positional argument $pos';
+                if (!res.exists(name))
+                    res[name] = [];
+                res[name].push(pos);
             case e:
                 throw 'Unknown option $e';
             }
         }
         // trace(res);
 
-        if (res["download"] == res["analyze"])
-            throw "Missing command";
-
-        if (res["<loc>"].length == 0)
-            throw "Nothing to do";
+        // constraints
+        // if (res["<loc>"].length == 0)
+        //     throw "Nothing to do";
 
         return res;
     }
@@ -70,19 +83,22 @@ class Main {
             errln('ERROR $e\n');
             errln("
             Usage:
+                zap dev [--data DIR]
                 zap download [--data DIR] [--] <loc> [<loc> ...]
                 zap analyze [--data DIR]
 
             Options:
                 --data DIR    Storage folder
             ".longString());
+            // neko.Lib.rethrow(e);
             Sys.exit(1);
             throw null;
         }
 
-        for (loc in args["<loc>"]) {
-            trace('Working on $loc');
-        }
+        if (args["dev"])
+            Dev.fromArgs(args).run();
+        
+        // TODO download, analyze, etc.
     }
 }
 

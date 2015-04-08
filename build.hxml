@@ -2,3 +2,5 @@
 -main zap.Main
 -cp src
 
+-cmd nekotools boot bin/zap.n
+
